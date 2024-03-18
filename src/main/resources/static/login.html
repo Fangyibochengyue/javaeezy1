@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h2>Login</h2>
+    <label for="username">Username:</label>
+    <input type="text" id="username" required><br><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" required><br><br>
+    <button type="submit" id="submit">Login</button>
+    <button id="register">Sign in</button>
+<script>
+    $("#submit").click(()=>{
+        event.preventDefault(); // 阻止表单默认提交行为
+
+        var username = $('#username').val();
+        var password = $('#password').val();
+        console.log(username,password)
+        $.ajax({
+            url: 'login', // 根据实际情况修改请求的URL
+            type: 'POST',
+            data: JSON.stringify({
+                username: username,
+                password: password
+            }),
+            contentType : "application/json;charset=UTF-8",
+            //定义回调响应的数据格式为JSON字符串,该属性可以省略
+            dataType : "json",
+            // headers: 'application/json',
+            success: function(response) {
+                // 处理登录成功后的逻辑
+                console.log('登录成功');
+                console.log(response.code)
+                if(response.code === 1){
+                    location.href = '/student.html'
+                } else {
+                    alert("登录失败")
+                    location.href = "/login.html"
+                }
+            },
+            error: function(xhr, status, error) {
+                // 处理登录失败后的逻辑
+                console.log('登录失败');
+                location.href = "/login.html"
+            }
+        });
+    })
+
+    $("#register").click(()=>{
+        location.href="/register.html"
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>学生信息管理</title>
+</head>
+<body>
+<h1>学生信息管理</h1>
+
+<table id="studentTable">
+    <thead>
+    <tr>
+        <th>学号</th>
+        <th>姓名</th>
+        <th>姓别</th>
+        <th>民族</th>
+        <th>电话号码</th>
+        <th>生日</th>
+        <th>地址</th>
+        <th>照片</th>
+        <th>个人介绍</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody id="studentTableBody"></tbody>
+</table>
+
+<!-- 添加用于编辑学生信息的表单 -->
+<form id="editForm">
+    <input type="hidden" id="editStudentId"> <!-- 用于存储编辑的学生ID -->
+    <input type="text" id="editName" placeholder="姓名">
+    <input type="text" id="editSex" placeholder="性别">
+    <input type="text" id="editNation" placeholder="民族">
+    <input type="text" id="editPhoneNumber" placeholder="电话号码">
+    <input type="date" id="editBirthday" placeholder="生日">
+    <input type="text" id="editAddress" placeholder="地址">
+    <input type="text" id="editPhoto" placeholder="照片">
+    <input type="text" id="editResume" placeholder="个人介绍">
+    <button type="submit">保存</button>
+</form>
+
+<!-- 添加用于添加学生信息的表单 -->
+<form id="addForm">
+    <input type="text" id="addName" placeholder="姓名">
+    <input type="text" id="addSex" placeholder="性别">
+    <input type="text" id="addNation" placeholder="民族">
+    <input type="text" id="addPhoneNumber" placeholder="电话号码">
+    <input type="date" id="addBirthday" placeholder="生日">
+    <input type="text" id="addAddress" placeholder="地址">
+    <input type="text" id="addPhoto" placeholder="照片">
+    <input type="text" id="addResume" placeholder="个人介绍">
+    <button type="submit">添加</button>
+</form>
+
+<script>
+    // 获取所有学生信息并渲染到表格中
+    function getAllStudents() {
+        fetch('/students')
+            .then(response => response.json())
+            .then(data => {
+                const studentTableBody = document.getElementById('studentTableBody');
+                studentTableBody.innerHTML = '';
+
+                data.data.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+              <td>${student.stuNO}</td>
+              <td>${student.name}</td>
+              <td>${student.sex}</td>
+              <td>${student.nation}</td>
+              <td>${student.telephone}</td>
+              <td>${student.birthday}</td>
+              <td>${student.address}</td>
+              <td>${student.photo}</td>
+              <td>${student.resume}</td>
+              <td>
+                <button onclick="editStudent(${student.stuNO})">编辑</button>
+                <button onclick="deleteStudent(${student.stuNO})">删除</button>
+              </td>
+            `;
+
+                    studentTableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error(error));
+    }
+
+    // 编辑学生信息
+    function editStudent(stuNO) {
+        // 根据学号发送请求获取学生信息
+        fetch(`/students/${stuNO}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    const student = data.data;
+
+                    // 将学生信息填充到编辑表单中
+                    document.getElementById('editStudentId').value = student.stuNO;
+                    document.getElementById('editName').value = student.name;
+                    document.getElementById('editSex').value = student.sex;
+                    document.getElementById('editNation').value = student.nation;
+                    document.getElementById('editPhoneNumber').value = student.telephone;
+                    document.getElementById('editBirthday').value = student.birthday;
+                    document.getElementById('editAddress').value = student.address;
+                    document.getElementById('editPhoto').value = student.photo;
+                    document.getElementById('editResume').value = student.resume;
+
+                    // 显示编辑表单
+                    document.getElementById('editForm').style.display = 'block';
+                } else {
+                    alert('获取学生信息失败');
+                }
+            })
+            .catch(error => console.error(error));
+    }
+
+    // 提交编辑表单
+    document.getElementById('editForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单默认提交行为
+
+        const stuNO = document.getElementById('editStudentId').value;
+        const name = document.getElementById('editName').value;
+        const sex = document.getElementById('editSex').value;
+        const nation = document.getElementById('editNation').value;
+        const phoneNumber = document.getElementById('editPhoneNumber').value;
+        const birthday = document.getElementById('editBirthday').value;
+        const address = document.getElementById('editAddress').value;
+        const photo = document.getElementById('editPhoto').value;
+        const resume = document.getElementById('editResume').value;
+
+        // 构建请求体
+        const requestBody = {
+            name: name,
+            sex: sex,
+            nation: nation,
+            telephone: phoneNumber,
+            birthday: birthday,
+            address: address,
+            photo: photo,
+            resume: resume
+        };
+
+        // 发送PUT请求更新学生信息
+        fetch(`/students/${stuNO}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    // 更新成功
+                    alert('学生信息更新成功');
+                    getAllStudents(); // 刷新学生列表
+                    document.getElementById('editForm').style.display = 'none'; // 隐藏编辑表单
+                } else {
+                    // 更新失败
+                    alert('学生信息更新失败');
+                }
+            })
+            .catch(error => console.error(error));
+    });
+
+    // 提交添加表单
+    document.getElementById('addForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单默认提交行为
+
+        const name = document.getElementById('addName').value;
+        const sex = document.getElementById('addSex').value;
+        const nation = document.getElementById('addNation').value;
+        const phoneNumber = document.getElementById('addPhoneNumber').value;
+        const birthday = document.getElementById('addBirthday').value;
+        const address = document.getElementById('addAddress').value;
+        const photo = document.getElementById('addPhoto').value;
+        const resume = document.getElementById('addResume').value;
+
+        // 构建请求体
+        const requestBody = {
+            name: name,
+            sex: sex,
+            nation: nation,
+            telephone: phoneNumber,
+            birthday: birthday,
+            address: address,
+            photo: photo,
+            resume: resume
+        };
+
+        // 发送POST请求添加学生信息
+        fetch(`/students`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    // 添加成功
+                    alert('学生信息添加成功');
+                    getAllStudents(); // 刷新学生列表
+                    document.getElementById('addForm').reset(); // 清空添加表单
+                } else {
+                    // 添加失败
+                    alert('学生信息添加失败');
+                }
+            })
+            .catch(error => console.error(error));
+    });
+
+    // 删除学生信息
+    function deleteStudent(stuNO) {
+        fetch(`/students/${stuNO}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    // 删除成功
+                    alert('删除成功');
+                    getAllStudents(); // 刷新学生列表
+                } else {
+                    // 删除失败
+                    alert('删除失败');
+                }
+            })
+            .catch(error => console.error(error));
+    }
+
+    // 页面加载完成后获取所有学生信息
+    document.addEventListener('DOMContentLoaded', function() {
+        getAllStudents();
+    });
+</script>
+</body>
+</html>

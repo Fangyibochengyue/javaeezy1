@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#registerForm").submit(function(event) {
+                event.preventDefault();
+                var username = $("#username").val();
+                var password = $("#password").val();
+                var tel = $("#tel").val();
+                var email = $("#email").val();
+
+                // 发送注册请求到后端
+                $.ajax({
+                    type: "POST",
+                    url: "/register",
+                    data: {
+                        username: username,
+                        password: password,
+                        phoneNumber: tel,
+                        email: email
+                    },
+                    success: function(data) {
+                        // 注册成功后跳转到登录页面
+                        window.location.href = "/login.html";
+                    },
+                    error: function() {
+                        // 注册失败，重新注册
+                        alert("注册失败，请重新注册！");
+                        $("#username").val("");
+                        $("#password").val("");
+                        $("#tel").val("");
+                        $("#email").val("");
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<h1>用户注册</h1>
+<form id="registerForm">
+    <label for="username">用户名：</label>
+    <input type="text" id="username" name="username" required><br><br>
+    <label for="password">密码：</label>
+    <input type="password" id="password" name="password" required><br><br>
+    <label for="tel">电话号码：</label>
+    <input type="text" id="tel" name="tel" required><br><br>
+    <label for="email">邮箱：</label>
+    <input type="email" id="email" name="email" required><br><br>
+    <input type="submit" value="注册">
+</form>
+</body>
+</html>
